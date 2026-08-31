@@ -7,3 +7,5 @@ Use your phone as a controller to play Pong. A simple realisation which is build
 -Socket.io / communication    
 -DeviceOrientationApi / for controller  
 -Pixi.js / for graphics  
+
+As I encountered a problem with importing Pixi.js in a separate file the scripts are in the ejs files. 
