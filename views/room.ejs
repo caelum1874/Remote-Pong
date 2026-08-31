@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="/pixi.min.js"></script>   
+    <script src="https://cdn.socket.io/4.8.3/socket.io.min.js"></script>
+    <link rel="stylesheet" href="/styles.css">
+    <title>Game</title>
+</head>
+<body>
+    
+    <span class="loader"></span>
+
+    <div class="center">
+        <div class="wrapper" id="startpanel">
+            <div class="tip blinking">Waiting for a device to pair...</div>
+            <div class="tip blinking" id="tip2">Connect your phone using this QR code</div>
+            <img class="blinking" alt="" id="image">
+        </div>
+        <div class="tip hide blinking" id="tip3">Starting the game...</div>
+
+    </div>
+
+    <script>
+        
+        let socket = io.connect(); 
+        let gameStarted = false 
+        const startpanel = document.getElementById('startpanel')
+        const tip2 = document.getElementById('tip2')
+        const tip3 = document.getElementById('tip3')
+
+        const imageqQR = document.getElementById('image')
+        const roomID = "<%= roomId %>" 
+        imageqQR.src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=http://192.168.1.36:3000/controller/${roomID}` // / was the problem
+
+        socket.on('user-connected', roomId => {
+            startpanel.classList.add('hide')
+            tip3.classList.remove('hide')
+        
+            setTimeout(() => {
+                tip3.classList.add('hide')
+                gameStarted = true
+            }, 2000);
+
+        })
+
+        socket.emit('join-room', roomID);
+    
+    (async () => {
+
+    const app = new PIXI.Application();
+
+    await app.init({
+        resizeTo: window 
+    });
+
+    app.canvas.style.position = 'absolute'
+    app.canvas.style.zIndex = '-3'    
+    document.body.appendChild(app.canvas);
+
+    let GAME_SCORE = new PIXI.Text({
+        text: "0:0",
+        anchor: 0.5,
+        style: {
+            fill: '#ffffff'
+        }
+    })
+
+    const MAXBOUNCEANGLE = 1.3;
+    const BALLSPEED = 5;
+    // Game score init
+    GAME_SCORE.position.set(app.screen.width / 2, app.screen.height / 2)
+    app.stage.addChild(GAME_SCORE);
+
+    // Ball init
+    let point = new PIXI.Graphics()
+    .rect(0, 0, 15, 15)
+    .fill( { color: 'white'} );
+    let pointTexture =  app.renderer.generateTexture(point)
+
+    let ball = new PIXI.Sprite(pointTexture);
+    ball.position.set(app.screen.width / 2, app.screen.height/2)
+    ball.direction = Math.random() * 90 + 45;    
+    [ball.vx, ball.vy] = [2, 2]
+    app.stage.addChild(ball)
+
+
+    let paddle = new PIXI.Graphics()
+    .rect(0, 0, 100, 20)
+    .fill( { color: 0xffea00 } )
+    let paddleTexture = app.renderer.generateTexture(paddle)
+    
+    class Player extends PIXI.Sprite {
+        constructor(x, y, texture) {
+            super(texture);
+            this.x = x;
+            this.y = y;
+            this.anchor.set(0.5);
+            this.eventMode = 'static';
+        }
+    }
+
+    let player1 = new Player(
+        app.screen.width / 2,
+        30, 
+        paddleTexture
+    );
+    app.stage.addChild(player1);
+
+    let player2 = new Player(
+        app.screen.width / 2,  
+        app.screen.height - 30, 
+        paddleTexture
+    );
+    app.stage.addChild(player2);
+    
+
+    function ballRoaming(obj) {
+               
+        obj.x += obj.vx 
+        obj.y += obj.vy 
+        if(obj.x<0 || obj.x>app.screen.width - 10) {
+            obj.vx *= -1;
+        }
+    }
+    
+    function calculateBounceAngle(paddle, ball) {
+    let IntersectY = (paddle.y - ball.y) / paddle.height;
+    let bounceAngle = IntersectY * MAXBOUNCEANGLE;
+    if (ball.vx > 0) {
+        ball.vx = BALLSPEED * -Math.cos(bounceAngle);
+    } else {
+        ball.vx = BALLSPEED * Math.cos(bounceAngle);
+    }
+    ball.vy = BALLSPEED * -Math.sin(bounceAngle);
+}
+
+function startOver() {
+    ball.position.set(Math.random() * app.screen.width / 2, app.screen.height / 2);
+
+}
+
+// https://github.com/joshuadjacoby/pixi-pong/blob/master/js/app.js
+    
+    function calculateCollision(object1, object2) {
+        let combinedHalfWidths, combinedHalfHeights, vx, vy;
+
+        distanceX = object1.x - object2.x;
+        distanceY = object1.y - object2.y;
+
+        //Figure out the combined half-widths and half-heights
+        combinedHalfWidths = object1.width / 2 + object2.width / 2;
+        combinedHalfHeights = object1.height / 2 + object2.height / 2;
+
+        //Check for a collision on the x axis
+        if (Math.abs(distanceX) < combinedHalfWidths) {
+            //A collision might be occuring. Check for a collision on the y axis
+            if (Math.abs(distanceY) < combinedHalfHeights) {
+                //There's definitely a collision happening
+                return true
+            }
+        }
+    }
+        socket.on("clientOrientationData", (xAxis, yAxis) => {
+            player2.position.x = app.screen.width/2 + xAxis  
+    })
+
+    let bounceP1 = 0
+    let bounceP2 = 0
+    let isOutDown = 0
+    let isOutUp = 0
+    let pointsP1 = 0
+    let pointsP2 = 0
+    let score = 15
+
+ 
+    let player1coefficient = 1
+
+    app.ticker.add(function(time) {
+        
+        ballRoaming(ball)
+        player1.position.x = ball.x * player1coefficient
+        distPl1Ball = Math.abs(player1.position.y - ball.y)
+
+        if (calculateCollision(player1, ball) ) {
+
+            console.log('top player hit')
+            calculateBounceAngle(player1, ball)
+        }
+
+          if (calculateCollision(player2, ball)) {
+       
+            console.log('bottom player hit')
+            calculateBounceAngle(player2, ball)
+        }
+        
+       if(ball.y > app.screen.height - 10 && !isOutDown) {
+        isOutDown = 1
+        console.log('Ball is out');
+        setTimeout(isOutDown = 0, 4000)
+        startOver()
+        pointsP1++
+        GAME_SCORE.text = pointsP1 + ':'+ pointsP2
+        player1coefficient = Math.random() 
+       }
+        
+        if(ball.y <= 1 && !isOutUp) {
+            isOutUp = 1 
+            console.log('Ball is out'); 
+            setTimeout(isOutUp = 0, 4000)
+            startOver()
+            pointsP2++
+            GAME_SCORE.text = pointsP1 + ':'+ pointsP2
+            player1coefficient = Math.random() 
+       }    
+
+       if(pointsP1 === score - 1 || pointsP2 === score - 1) {
+            gameOver()
+       }
+       
+
+    })
+    
+    function gameOver() {
+        pointsP1 = 0
+        pointsP2 = 0
+    }
+     
+
+})();
+    </script>
+    
+
+</body>
+</html>

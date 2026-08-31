@@ -1,0 +1,164 @@
+body {
+    margin: 0px;
+    font-family: Arial, Helvetica, sans-serif;
+
+}
+
+.center {
+    position: absolute;
+    left: 50%;
+    top: 40%;
+    transform: translate(-50%, -50%);
+}
+
+.wrapper {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    text-align: center;
+}
+
+.wrapper > * {
+    padding: 10px;
+}
+.wrapper button {
+    font-size: 25px;
+}
+#title {
+    font-size: 50px;  
+    font-weight: bold;
+    color: #59bded;
+}
+
+.titleinfo {
+    color: #5d3b39;
+    font-weight: bold;
+}
+
+button {
+    margin: 10px;
+    background-color: transparent;
+    border-radius: 0px;
+    border: 2px solid transparent;
+    color: #5d3b39;
+    font-weight: bold;
+    cursor:pointer;
+
+}
+
+.connectLock::after {
+    content: url(lockicon40.svg);
+    display: block; 
+}
+
+button:disabled {
+    animation: pause;
+    color: #a5a5a5;
+    cursor: default;
+}
+
+.buttonHover:hover {
+    margin: 10px;
+    background-color: #ffffee;
+    border-radius: 0px;
+    border: 2px solid #c7e5e2;
+    color: #5d3b39;
+    font-weight: bold;
+}
+
+.tip {
+    font-size: 25px;
+    color: #5d3b39;
+    font-weight: bold;
+}
+
+#randomnumber {
+    color: #a5a5a5;
+    font-size: 50px;
+
+}
+
+
+@keyframes signalAnimation {
+    0% {opacity: 100%;}
+    25% {opacity: 50%;}
+    50% {opacity: 100%;}
+    75% {opacity: 50%;}
+    100% {opacity: 100%;}
+
+}
+
+button {
+    animation: signalAnimation 3s infinite;
+}
+
+.blinking {
+    animation: signalAnimation 3s infinite;
+}
+
+#codeinput {
+    border-style:solid;
+    border-color: #5d3b39;
+    outline: none;  
+    text-align: center;
+}
+
+form {
+    height: auto;
+    width: auto;
+}
+
+
+#image {
+    width: 50%;
+    height: 50%;
+    padding-left: 25%;
+}
+
+.hide {
+    visibility: hidden;
+}
+
+#tip3 {
+    z-index: 2;
+    position: absolute;
+    left: 50%;
+    top: 40%;
+    transform: translate(-50%, -50%);
+
+}
+
+.disappear {
+    color: transparent;
+}
+
+#dot {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 10px;  
+    height: 10px; 
+    background-color:#0F2438;
+    opacity: 0.5;
+    border-radius: 50%; 
+    transform: translate(-50%, -50%); 
+    display: block;
+}
+
+table {
+    position: absolute;
+    z-index: -1;
+     height: 100%;
+     width: 100%;       
+}
+
+tr {
+    height: 100%;
+
+}
+
+td {
+    width: 50%;
+    background-color: #A7C7E7;
+}
+

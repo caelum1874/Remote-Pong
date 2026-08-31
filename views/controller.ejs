@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.socket.io/4.8.3/socket.io.min.js"></script>
+    <link rel="stylesheet" href="/styles.css">
+    <title>Controller</title>
+</head>
+<body>
+   <div class="center">
+        <div class="wrapper">
+            <div class="tip blinking" id="tip4">You are connected</div>
+            <button id="startButton" class="hide">Start</button>
+
+        </div>
+        <div id="dot" class="hide"></div>
+    </div>
+    <table id="table" class="hide">
+    <tr>
+        <td id="rect1"></td>
+        <td id="rect2"></td>
+    
+    </tr>
+    
+    </table>
+
+    <script>
+        // a dot and two separate rectangles to visualise the orientation 
+        const dot = document.getElementById('dot')
+        const table = document.getElementById('table')
+        const rect1 = document.getElementById('rect1')
+        const rect2 = document.getElementById('rect2')
+        const tip4 = document.getElementById('tip4')
+
+        let positionofplayer = 0
+        const SENSITIVITY = 5;
+
+let baseOrientation = {
+    alpha: null,
+    beta: null,
+    gamma: null
+};
+
+
+
+function setupListeners() {
+    const setBaseOrientation = (event) => {
+        if (baseOrientation.alpha === null) {
+            baseOrientation.alpha = event.alpha;
+            baseOrientation.beta = event.beta;
+            baseOrientation.gamma = event.gamma;
+            dot.classList.remove('hide')
+            table.classList.remove('hide')
+
+        }
+
+        window.removeEventListener('deviceorientation', setBaseOrientation);
+        window.addEventListener('deviceorientation', handleOrientation);
+    };
+    
+    window.addEventListener('deviceorientation', setBaseOrientation);
+
+
+    startButton.style.display = 'none';
+}
+
+    function handleOrientation(event) {
+    if (baseOrientation.alpha === null) return; 
+
+    const deltaAlpha = event.alpha - baseOrientation.alpha;
+    const deltaBeta = event.beta - baseOrientation.beta;
+    const deltaGamma = event.gamma - baseOrientation.gamma;
+    
+    const moveX = -deltaGamma * SENSITIVITY;
+    const moveY = -deltaBeta * SENSITIVITY;
+    
+    if(-moveX > 0) {
+        positionofplayer += 1;
+        rect2.style.backgroundColor = '#A7C7E7'
+        rect1.style.backgroundColor = 'white'
+
+    } else {
+        positionofplayer -= 1;
+        rect2.style.backgroundColor = 'white'
+        rect1.style.backgroundColor = '#A7C7E7'
+
+    }
+
+    socket.emit("serverOrientationData", positionofplayer, -moveY)
+    dot.style.transform = `translate(50%, 50%) translate(${-moveX}px, ${0}px)`;
+    
+}   
+    startButton.addEventListener('click', setupListeners);
+
+        socket = io();
+        const imageQRId = "<%= roomId %>"  
+        socket.emit('join-room', imageQRId)
+
+        socket.on('connect', () => {
+             setTimeout(() => {
+                tip4.classList.add('disappear')    
+                startButton.classList.remove('hide')
+            }, 2000);
+        })
+ 
+
+    </script>
+</body>
+</html>
