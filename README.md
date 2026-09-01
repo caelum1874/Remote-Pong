@@ -1,14 +1,14 @@
 # Remote-Pong
 Use your phone as a controller to play Pong. A simple realisation which is build with the following: 
 
--Node.js  
--Express.js   
--EJS / to generate pages with unique ID  
--Socket.io / communication    
--DeviceOrientationApi / for controller  
--Pixi.js / for graphics  
-
-If you want to run the project change the IP address in the room.ejs at the 36 line.
+-Node.js    
+-Express.js     
+-EJS / to generate pages with unique ID    
+-Socket.io / communication      
+-DeviceOrientationApi / for controller    
+-Pixi.js / for graphics.     
+Tested on Firefox Mobile (134.0.1)  
+If you want to run the project change the IP address in the room.ejs at the 36 line.  
 
 Sources and materials used:  
 -Collision detection and bounce angle of the ball  
@@ -27,3 +27,5 @@ Other problems and shortcomings:
 -I restricted the number of clients to two for one room, but right now it doesn't check if one of the clients is truly a controller/phone.  
 -Primitive AI for the bot  
 -Primitive UI/UX
+
+<img src="pong showcase.gif"/>  
